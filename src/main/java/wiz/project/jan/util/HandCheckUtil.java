@@ -40,21 +40,15 @@ public final class HandCheckUtil {
      * @param hand 手牌。
      * @return 待ち牌リスト。
      */
-    public static List<JanPai> getCompletableJanPaiList(final Hand hand) {
+    public static List<JanPai> getCompletableJanPaiList(final Map<JanPai, Integer> hand) {
         if (hand == null) {
             throw new NullPointerException("Hand is null.");
         }
         
         final List<JanPai> resultList = new ArrayList<JanPai>();
-        final Map<JanPai, Integer> source = hand.getMenZenMap();
-        JanPaiUtil.cleanJanPaiMap(source);
         for (final JanPai pai : JanPai.values()) {
-            if (hand.getJanPaiCount(pai) >= 4) {
-                // 既に4牌持っている
-                continue;
-            }
-            
-            final Map<JanPai, Integer> pattern = deepCopyMap(source);
+            // 既に手牌で4枚使っていても判定自体は行う
+            final Map<JanPai, Integer> pattern = deepCopyMap(hand);
             JanPaiUtil.addJanPai(pattern, pai, 1);
             if (isComplete(pattern)) {
                 resultList.add(pai);
@@ -183,8 +177,8 @@ public final class HandCheckUtil {
         final Map<JanPai, Integer> menZen = hand.getMenZenMap();
         JanPaiUtil.cleanJanPaiMap(menZen);
         for (final JanPai pai : menZen.keySet()) {
-            final Hand pattern = hand.clone();
-            pattern.removeJanPai(pai);
+            final Map<JanPai, Integer> pattern = deepCopyMap(menZen);
+            JanPaiUtil.removeJanPai(pattern, pai, 1);
             final List<JanPai> completableList = getCompletableJanPaiList(pattern);
             if (!completableList.isEmpty()) {
                 final Map<JanPai, Integer> expectation = getExpectation(hand, completableList);
@@ -250,7 +244,7 @@ public final class HandCheckUtil {
      * @param hand 手牌。
      * @return 判定結果。
      */
-    public static boolean isTenpai(final Hand hand) {
+    public static boolean isTenpai(final Map<JanPai, Integer> hand) {
         return !getCompletableJanPaiList(hand).isEmpty();
     }
     

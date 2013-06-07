@@ -54,11 +54,8 @@ public final class JanPaiUtil {
             count = source.get(key);
         }
         
-        final int target = count + value;
-        if (target > 4) {
-            throw new IllegalArgumentException("Failure - " + count + " : " + value);
-        }
-        source.put(key, target);
+        // 4枚以上になる場合でもチェックしない
+        source.put(key, count + value);
     }
     
     /**
