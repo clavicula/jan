@@ -182,7 +182,11 @@ public final class HandCheckUtil {
             final List<JanPai> completableList = getCompletableJanPaiList(pattern);
             if (!completableList.isEmpty()) {
                 final Map<JanPai, Integer> expectation = getExpectation(hand, completableList);
-                resultList.add(new TenpaiPattern(pai, completableList, expectation));
+                final int totalCount = JanPaiUtil.getJanPaiTotalCount(expectation);
+                if (totalCount != 0) {
+                    // 待ちが枯れていなければ追加
+                    resultList.add(new TenpaiPattern(pai, completableList, expectation));
+                }
             }
         }
         return resultList;
