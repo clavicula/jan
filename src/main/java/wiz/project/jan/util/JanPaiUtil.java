@@ -190,6 +190,9 @@ public final class JanPaiUtil {
         if (x == null || y == null || z == null) {
             throw new NullPointerException("Source jan pai is null - " + x + ", " + y + ", " + z);
         }
+        if (x.isJi() || y.isJi() || z.isJi()) {
+            return false;
+        }
         return x.getNext() == y && y.getNext() == z;
     }
     

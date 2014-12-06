@@ -16,7 +16,7 @@ import wiz.project.jan.CompleteInfo;
 import wiz.project.jan.CompleteJanPai;
 import wiz.project.jan.Hand;
 import wiz.project.jan.JanPai;
-import wiz.project.jan.Player;
+import wiz.project.jan.PlayerStatus;
 import wiz.project.jan.TenpaiPattern;
 import wiz.project.jan.Wind;
 
@@ -65,7 +65,7 @@ public final class HandCheckUtil {
      * @param fieldWind 場風。
      * @return 和了情報。
      */
-    public static CompleteInfo getCompleteInfo(final Player player, final CompleteJanPai completePai, final Wind fieldWind) {
+    public static CompleteInfo getCompleteInfo(final PlayerStatus player, final CompleteJanPai completePai, final Wind fieldWind) {
         if (player == null) {
             throw new NullPointerException("Player is null.");
         }

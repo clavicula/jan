@@ -22,6 +22,26 @@ public enum Wind {
     
     
     /**
+     * 次の風を取得
+     * 
+     * @return 次の風。
+     */
+    public Wind getNext() {
+    	switch (this) {
+        case TON:
+            return NAN;
+        case NAN:
+            return SHA;
+        case SHA:
+            return PEI;
+        case PEI:
+            return TON;
+        default:
+            throw new InternalError();
+        }
+    }
+    
+    /**
      * 文字列に変換
      * 
      * @return 変換結果。

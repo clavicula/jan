@@ -1,230 +1,194 @@
 /**
  * Player.java
- * 
- * @Author
- *   Yuki Kawata
  */
 
 package wiz.project.jan;
 
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import wiz.project.jan.util.HandCheckUtil;
+import wiz.project.jan.util.JanPaiUtil;
 
 
 
 /**
  * プレイヤー
  */
-public final class Player implements Cloneable {
-    
-    /**
-     * コンストラクタ
-     */
-    public Player() {
-        _playerID = UUID.randomUUID();
-    }
-    
-    /**
-     * コンストラクタ
+public class Player implements Observer {
+	
+	/**
+	 * コンストラクタ
+	 */
+	public Player() {
+	}
+	
+	/**
+	 * コンストラクタ
+	 * 
+	 * @param name プレイヤー名。
+	 */
+	public Player(final String name) {
+		_status.setName(name);
+	}
+	
+	
+	
+	/**
+	 * ツモ牌を手牌に加える
+	 * 
+	 * @param tsumo ツモ牌。
+	 * @param discard 捨て牌。
+	 */
+	public void addJanPai(final JanPai tsumo, final JanPai discard) {
+		final Hand hand = _status.getHand();
+		hand.removeJanPai(discard);
+		hand.addJanPai(tsumo);
+		_status.setHand(hand);
+	}
+	
+	/**
+	 * アクションリストを消去
+	 */
+	public void clearActionList() {
+		_actionList.clear();
+	}
+	
+	/**
+	 * アクションリストを取得
+	 * 
+	 * @return アクションリスト。
+	 */
+	public List<Action> getActionList() {
+		return deepCopyList(_actionList);
+	}
+	
+	/**
+	 * ステータスを取得
+	 * 
+	 * @return ステータス。
+	 */
+	public PlayerStatus getStatus() {
+		return _status.clone();
+	}
+	
+	/**
+	 * 各局の初期化処理
+	 * 
+	 * @param hand 配牌。
+	 */
+	public void initializeOnGame(final List<JanPai> hand) {
+		if (hand == null) {
+			throw new NullPointerException("Hand is null.");
+		}
+		_status.setHand(new Hand(hand));
+	}
+	
+	/**
+	 * フリテンか
+	 * 
+	 * @return 判定結果。
+	 */
+	public boolean isFuriten() {
+		final Map<JanPai, Integer> hand = getCleanedHand();
+		final List<JanPai> completableList = HandCheckUtil.getCompletableJanPaiList(hand);
+		final List<JanPai> discardList = Field.getInstance().getRiver(_status.getWind());
+		for (final JanPai completable : completableList) {
+			if (discardList.contains(completable)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * 次の風を設定
+	 */
+	public void setNextWind() {
+		_status.setWind(_status.getWind().getNext());
+	}
+	
+	/**
+	 * ステータスを設定
+	 * 
+	 * @param status ステータス。
+	 */
+	public void setStatus(final PlayerStatus status) {
+		if (status != null) {
+			_status = status.clone();
+		}
+		else {
+			_status = new PlayerStatus();
+		}
+	}
+	
+	/**
+	 * 風を設定
+	 * 
+	 * @param wind 風。
+	 */
+	public void setWind(final Wind wind) {
+		_status.setWind(wind);
+	}
+	
+	/**
+	 * 更新通知時の処理
+	 * 
+	 * @param target 監視対象。
+	 * @param param 通知パラメータ。
+	 */
+	public void update(final Observable target, final Object param) {
+		if (target == null) {
+			throw new NullPointerException("Subject is null.");
+		}
+		if (!(param instanceof JanPai)) {
+			// 何もしない
+			return;
+		}
+		
+		final Map<JanPai, Integer> hand = getCleanedHand();
+		JanPaiUtil.addJanPai(hand, (JanPai)param, 1);
+		if (HandCheckUtil.isComplete(hand)) {
+			_actionList.add(Action.RON);
+		}
+	}
+	
+	
+	
+	/**
+     * リストをディープコピー
      * 
-     * @param name 名前。
-     */
-    public Player(final String name) {
-        this();
-        setName(name);
-    }
-    
-    /**
-     * コンストラクタ
-     * 
-     * @param name 名前。
-     * @param wind 風。
-     */
-    public Player(final String name, final Wind wind) {
-        this(name);
-        setWind(wind);
-    }
-    
-    /**
-     * コンストラクタ
-     * 
-     * @param name 名前。
-     * @param wind 風。
-     * @param hand 手牌。
-     */
-    public Player(final String name, final Wind wind, final Hand hand) {
-        this(name, wind);
-        setHand(hand);
-    }
-    
-    /**
-     * コピーコンストラクタ
-     * 
-     * @param source 複製元。
-     */
-    public Player(final Player source) {
-        if (source != null) {
-            _playerID = source._playerID;
-            _wind = source._wind;
-            _hand = source._hand.clone();
-        }
-        else {
-            _playerID = UUID.randomUUID();
-        }
-    }
-    
-    
-    
-    /**
-     * 自分自身を複製 (ディープコピー)
-     * 
+     * @param sourceList 複製元。
      * @return 複製結果。
      */
-    @Override
-    public Player clone() {
-        return new Player(this);
+    private <E> List<E> deepCopyList(final List<E> sourceList) {
+    	return new ArrayList<>(sourceList);
     }
     
     /**
-     * 等価なオブジェクトか
-     * 
-     * @param target 比較対象。
-     * @return 比較結果。
+     * 整形済みの手牌を取得
      */
-    @Override
-    public boolean equals(final Object target) {
-        if (this == target) {
-            return true;
-        }
-        if (target == null) {
-            return false;
-        }
-        if (!(target instanceof Player)) {
-            return false;
-        }
-        
-        final Player targetPlayer = (Player)target;
-        return _playerID.equals(targetPlayer._playerID);
-    }
-    
-    /**
-     * 手牌を取得
-     * 
-     * @return 手牌。
-     */
-    public Hand getHand() {
-        return _hand.clone();
-    }
-    
-    /**
-     * IDを取得
-     * 
-     * @return ID。
-     */
-    public UUID getID() {
-        return _playerID;
-    }
-    
-    /**
-     * 名前を取得
-     * 
-     * @return 名前。
-     */
-    public String getName() {
-        return _name;
-    }
-    
-    /**
-     * 風を取得
-     * 
-     * @return 風。
-     */
-    public Wind getWind() {
-        return _wind;
-    }
-    
-    /**
-     * ハッシュコードを取得
-     * 
-     * @return ハッシュコード。
-     */
-    @Override
-    public int hashCode() {
-        return _playerID.hashCode();
-    }
-    
-    /**
-     * 手牌を設定
-     * 
-     * @param hand 手牌。
-     */
-    public void setHand(final Hand hand) {
-        if (hand != null) {
-            _hand = hand.clone();
-        }
-        else {
-            _hand = new Hand();
-        }
-    }
-    
-    /**
-     * 名前を設定
-     * 
-     * @param name 名前。
-     */
-    public void setName(final String name) {
-        if (name != null) {
-            _name = name;
-        }
-        else {
-            _name = "";
-        }
-    }
-    
-    /**
-     * 風を設定
-     * 
-     * @param wind 風。
-     */
-    public void setWind(final Wind wind) {
-        if (wind != null) {
-            _wind = wind;
-        }
-        else {
-            _wind = Wind.TON;
-        }
-    }
-    
-    /**
-     * 文字列に変換
-     * 
-     * @return 変換結果。
-     */
-    @Override
-    public String toString() {
-        return _name + " [" + _wind + "]";
+    private Map<JanPai, Integer> getCleanedHand() {
+    	final Map<JanPai, Integer> hand = _status.getHand().getMenZenMap();
+		JanPaiUtil.cleanJanPaiMap(hand);
+		return hand;
     }
     
     
     
+	/**
+	 * プレイヤーの状態
+	 */
+	private PlayerStatus _status = new PlayerStatus();
+	
     /**
-     * ID
+     * 可能なアクション
      */
-    private final UUID _playerID;
-    
-    /**
-     * 名前
-     */
-    private String _name = "";
-    
-    /**
-     * 風
-     */
-    private Wind _wind = Wind.TON;
-    
-    /**
-     * 手牌
-     */
-    private Hand _hand = new Hand();
+    private List<Action> _actionList = new CopyOnWriteArrayList<>();
     
 }
 

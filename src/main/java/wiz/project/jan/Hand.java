@@ -227,6 +227,16 @@ public final class Hand implements Cloneable {
     }
     
     /**
+     * 指定牌の面前所持数を取得
+     * 
+     * @param pai 検索対象。
+     * @return 所持数。
+     */
+    public int getMenZenJanPaiCount(final JanPai pai) {
+        return _core.get(pai);
+    }
+    
+    /**
      * 面前手牌リストを取得
      * 
      * @return 面前手牌リスト。

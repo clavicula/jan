@@ -82,6 +82,8 @@ public enum JanPai {
             return MAN_8;
         case MAN_8:
             return MAN_9;
+        case MAN_9:
+            return MAN_1;
         case PIN_1:
             return PIN_2;
         case PIN_2:
@@ -98,6 +100,8 @@ public enum JanPai {
             return PIN_8;
         case PIN_8:
             return PIN_9;
+        case PIN_9:
+            return PIN_1;
         case SOU_1:
             return SOU_2;
         case SOU_2:
@@ -114,8 +118,24 @@ public enum JanPai {
             return SOU_8;
         case SOU_8:
             return SOU_9;
+        case SOU_9:
+            return SOU_1;
+        case TON:
+        	return NAN;
+        case NAN:
+        	return SHA;
+        case SHA:
+        	return PEI;
+        case PEI:
+        	return TON;
+        case HAKU:
+        	return HATU;
+        case HATU:
+        	return CHUN;
+        case CHUN:
+        	return HAKU;
         default:
-            return null;
+            throw new InternalError();
         }
     }
     
@@ -126,6 +146,8 @@ public enum JanPai {
      */
     public JanPai getPrev() {
         switch (this) {
+        case MAN_1:
+            return MAN_9;
         case MAN_2:
             return MAN_1;
         case MAN_3:
@@ -142,6 +164,8 @@ public enum JanPai {
             return MAN_7;
         case MAN_9:
             return MAN_8;
+        case PIN_1:
+            return PIN_9;
         case PIN_2:
             return PIN_1;
         case PIN_3:
@@ -158,6 +182,8 @@ public enum JanPai {
             return PIN_7;
         case PIN_9:
             return PIN_8;
+        case SOU_1:
+            return SOU_9;
         case SOU_2:
             return SOU_1;
         case SOU_3:
@@ -174,8 +200,22 @@ public enum JanPai {
             return SOU_7;
         case SOU_9:
             return SOU_8;
+        case TON:
+        	return PEI;
+        case NAN:
+        	return TON;
+        case SHA:
+        	return NAN;
+        case PEI:
+        	return SHA;
+        case HAKU:
+        	return CHUN;
+        case HATU:
+        	return HAKU;
+        case CHUN:
+        	return HATU;
         default:
-            return null;
+            throw new InternalError();
         }
     }
     
